@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css?family=Jua&display=swap');
+
+body {
+  background-image: url('https://media.giphy.com/media/BHNfhgU63qrks/giphy.gif');
+  background-size: cover;
+
+  height: 100vh;
+  padding:0;
+  margin:0;
+}
+
+.jumbotron {
+  font-family: 'Jua', sans-serif;
+  background-color: #ffffffe0 !important;
+}

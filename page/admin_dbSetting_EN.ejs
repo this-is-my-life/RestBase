@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RestBase - Rest API + DataBase</title>
+    <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.indigo-pink.min.css">
+    <script src="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  </head>
+  <body>
+    <!-- Always shows a header, even in smaller screens. -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+          <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">RestBase Management - DataBase Management</span>
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+            <nav class="mdl-navigation">
+              
+            </nav>
+          </div>
+        </header>
+        <div class="mdl-layout__drawer">
+          <span class="mdl-layout-title">Menu</span>
+          <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" href="/admin/dashboard?auth=<%= auth %>">DashBoard</a>
+            <a class="mdl-navigation__link" href="/admin/dbSetting?auth=<%= auth %>">DataBase Management</a>
+            <a class="mdl-navigation__link" href="/admin/serverSetting?auth=<%= auth %>">RestServer Management</a>
+          </nav>
+        </div>
+        <main class="mdl-layout__content">
+          <div class="page-content" id="render">
+            <div class="alert alert-danger" role="alert">
+              <b>RestBase notifcation: </b> Do not use "F5" for Security
+            </div>
+          </div>
+        </main>
+      </div>
+  </body>
+</html>
