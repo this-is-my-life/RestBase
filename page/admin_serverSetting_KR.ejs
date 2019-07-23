@@ -42,15 +42,17 @@
         <main class="mdl-layout__content">
           <div class="page-content" id="render">
               <div class="container">
-              <% dbs.forEach((v, i) => { %>
-                <button type="button" class="btn btn-primary" style="margin-top: 20px" data-toggle="modal" data-target="#all<%= v %>">/<%= v.replace('.json', '') %> 전체 설정</button>
+              <%
+                let counter = 0
+                dbs.forEach((v, i) => { %>
+                <button type="button" class="btn btn-primary" style="margin-top: 20px" data-toggle="modal" data-target="">전체 설정</button>
                 <div class="card" style="margin-top:5px">
                   <div class="card-body">
                     <h4 class="card-title"><%= 'GET /' + v.replace('.json', '') %></h4>
                     <p class="card-text">
                       <div class="btn-group-toggle" data-toggle="buttons">
-                        <label class="btn btn-secondary active">
-                          <input type="checkbox" <%=  %> autocomplete="off"> 비활성화
+                        <label onclick="apply('<%= v %>,get',document.getElementsByClassName('checkLab')[<%= counter++ %>].classList.contains('active') ? 'false' : 'true' )" class="btn btn-success checkLab <%= settings.permission[v].get ? 'active' : '' %>">
+                          <input type="checkbox" class="checkBtn" autocomplete="off"> 비활성화됨
                         </label>
                       </div>
                     </p>
@@ -62,8 +64,8 @@
                     <h4 class="card-title"><%= 'POST /' + v.replace('.json', '') %></h4>
                     <p class="card-text">
                         <div class="btn-group-toggle" data-toggle="buttons">
-                          <label class="btn btn-secondary active">
-                            <input type="checkbox" <%=  %> autocomplete="off"> 비활성화
+                          <label onclick="apply('<%= v %>,post', document.getElementsByClassName('checkLab')[<%= counter++ %>].classList.contains('active') ? 'false' : 'true')" class="btn btn-success checkLab <%= settings.permission[v].post ? 'active' : ''  %>">
+                            <input type="checkbox" class="checkBtn" autocomplete="off"> 비활성화됨
                           </label>
                         </div>
                       </p>
@@ -74,8 +76,8 @@
                     <h4 class="card-title"><%= 'PUT /' + v.replace('.json', '') %></h4>
                     <p class="card-text">
                         <div class="btn-group-toggle" data-toggle="buttons">
-                          <label class="btn btn-secondary active">
-                            <input type="checkbox" <%=  %> autocomplete="off"> 비활성화
+                          <label onclick="apply('<%= v %>,put', document.getElementsByClassName('checkLab')[<%= counter++ %>].classList.contains('active') ? 'false' : 'true')" class="btn btn-success checkLab <%= settings.permission[v].put ? 'active' : ''  %>">
+                            <input type="checkbox" class="checkBtn" autocomplete="off"> 비활성화됨
                           </label>
                         </div>
                       </p>
@@ -86,38 +88,46 @@
                     <h4 class="card-title"><%= 'DELETE /' + v.replace('.json', '') %></h4>
                     <p class="card-text">
                         <div class="btn-group-toggle" data-toggle="buttons">
-                          <label class="btn btn-secondary active">
-                            <input type="checkbox" <%=  %> autocomplete="off"> 비활성화
+                          <label onclick="apply('<%= v %>,delete', document.getElementsByClassName('checkLab')[<%= counter++ %>].classList.contains('active') ? 'false' : 'true')" class="btn btn-success checkLab <%= settings.permission[v].delete ? 'active' : ''  %>">
+                            <input type="checkbox" class="checkBtn" autocomplete="off"> 비활성화됨
                           </label>
                         </div>
                       </p>
                   </div>
                 </div>
                 <hr />
-
-                <div class="modal fade" id="all<%= v %>" tabindex="-1" role="dialog" aria-labelledby="all<%= v %>" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                          ...
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                          <button type="button" class="btn btn-primary">Save changes</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
               <% }) %>
               </div>
           </div>
         </main>
-      </div>      
+      </div>
+      <script>
+        setInterval(() => {
+          for (let n = 0; n < document.getElementsByClassName('checkLab').length; n++) {
+            if (document.getElementsByClassName('checkLab')[n].classList.contains('active')) {
+              document.getElementsByClassName('checkLab')[n].innerHTML = '활성화됨'
+              document.getElementsByClassName('checkLab')[n].classList.replace('btn-danger', 'btn-success')
+            } else {
+              document.getElementsByClassName('checkLab')[n].innerHTML = '비활성화됨'
+              document.getElementsByClassName('checkLab')[n].classList.replace('btn-success', 'btn-danger')
+            }
+          }
+        }, 1)
+
+        function apply (key, value) {
+          var xhr = new XMLHttpRequest()
+          var target = '/admin/setPermission?auth=<%= auth %>&key=' + key + '&value=' + value
+          xhr.open('GET', target)
+          xhr.send()
+
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE){
+              if (xhr.status !== 200) {
+                alert('서버가 응답하지 않습니다!')
+              }
+            }
+          }
+        }
+      </script>
   </body>
 </html>

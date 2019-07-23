@@ -15,6 +15,8 @@ if (settings.useCors) {
   app.use(cors())
 }
 
+app.use(express.json())
+
 if (!settings.permission) {
   settings.permission = {}
 }
@@ -23,16 +25,18 @@ if (!fs.existsSync('./DB/')) {
   fs.mkdirSync('./DB/')
 }
 
-fs.readdirSync('./DB/').forEach((file) => {
-  if (!settings.permission[file]) {
-    settings.permission[file] = {
-      get: true,
-      post: false,
-      put: false,
-      delete: false
+setInterval(() => {
+  fs.readdirSync('./DB/').forEach((file) => {
+    if (!settings.permission[file]) {
+      settings.permission[file] = {
+        get: true,
+        post: false,
+        put: false,
+        delete: false
+      }
     }
-  }
-})
+  })
+}, 100)
 
 fs.writeFileSync('./settings.js', 'module.exports = ' + JSON.stringify(settings))
 
@@ -46,16 +50,33 @@ app.get('/admin', (req, res) => {
 })
 
 app.get('/admin/:locate', (req, res) => {
+  console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
   switch (req.params.locate) {
     case 'verity':
       if (!req.query.id || !req.query.pw) {
         res.redirect('/admin')
       } else if (settings.adminSettings.adminID === req.query.id && settings.adminSettings.adminPW === req.query.pw) {
+        console.log(markup.yellow.underline('VERITY') + ' ' + markup.yellow('Requested ID: ' + req.query.id + ' | Requested PW Hash: ' + req.query.pw))
+        console.log(markup.yellow.underline('VERITY') + ' ' + markup.yellow('Stored ID: ' + settings.adminSettings.adminID + ' | Stored PW Hash: ' + settings.adminSettings.adminPW))
+
         const authToken = uuid()
         keys[keys.length] = authToken
+        console.log(markup.magenta.underline('AUTHGEN') + ' ' + markup.magenta('Auth UUID: ' + authToken))
         res.redirect('/admin/dashboard?auth=' + authToken)
       } else {
         res.redirect('/admin')
+      }
+      break
+
+    case 'setPermission':
+      if (keys.includes(req.query.auth) && req.query.key && req.query.value) {
+        console.log(markup.green.underline('AUTH') + ' ' + markup.green('Auth UUID: ' + req.query.auth))
+        const keyArgs = req.query.key.split(',')
+        settings.permission[keyArgs[0]][keyArgs[1]] = JSON.parse(req.query.value)
+        fs.writeFileSync('./settings.js', 'module.exports = ' + JSON.stringify(settings))
+        res.sendStatus(200)
+      } else {
+        res.sendStatus(406)
       }
       break
 
@@ -63,9 +84,11 @@ app.get('/admin/:locate', (req, res) => {
       if (!req.query.auth) {
         res.sendStatus(401)
       } else if (keys.includes(req.query.auth)) {
+        console.log(markup.green.underline('AUTH') + ' ' + markup.green('Auth UUID: ' + req.query.auth))
         const auth = uuid()
         keys[keys.indexOf(req.query.auth)] = auth
-        ejs.renderFile('./page/admin_' + req.params.locate + '_' + settings.locale + '.ejs', { auth: auth, dbs: fs.readdirSync('./DB/') }, (err, str) => {
+        console.log(markup.magenta.underline('AUTHGEN') + ' ' + markup.magenta('Auth UUID: ' + auth))
+        ejs.renderFile('./page/admin_' + req.params.locate + '_' + settings.locale + '.ejs', { auth: auth, dbs: fs.readdirSync('./DB/'), settings: settings }, (err, str) => {
           if (err) console.error(err)
           res.send(str)
         })
@@ -103,10 +126,10 @@ app.get('/', (req, res) => {
 
 app.get('/:db', (req, res) => {
   console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
-  if (!fs.existsSync('./db/' + req.params.db + '.json')) {
+  if (!fs.existsSync('./DB/' + req.params.db + '.json')) {
     res.sendStatus(404)
-  } else {
-    const data = require('./db/' + req.params.db + '.json')
+  } else if (settings.permission[req.params.db + '.json'].get) {
+    const data = JSON.parse(fs.readFileSync('./DB/' + req.params.db + '.json'))
     if (req.query.type === 'xml') {
       res.set('Content-Type', 'text/xml')
       res.send(jsontoxml(data))
@@ -114,6 +137,46 @@ app.get('/:db', (req, res) => {
       res.set('Content-Type', 'application/json')
       res.send(data)
     }
+  } else {
+    res.sendStatus(403)
+  }
+})
+
+app.post('/:db', (req, res) => {
+  console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
+  if (!fs.existsSync('./DB/' + req.params.db + '.json')) {
+    res.sendStatus(404)
+  } else if (settings.permission[req.params.db + '.json'].post) {
+    fs.writeFileSync('./DB/' + req.params.db + '.json', JSON.stringify(req.body))
+    res.sendStatus(200)
+  } else {
+    res.sendStatus(403)
+  }
+})
+
+app.put('/:db', (req, res) => {
+  console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
+  if (!fs.existsSync('./DB/' + req.params.db + '.json')) {
+    res.sendStatus(404)
+  } else if (settings.permission[req.params.db + '.json'].put) {
+    let data = JSON.parse(fs.readFileSync('./DB/' + req.params.db + '.json'))
+    data = req.body
+    fs.writeFileSync('./DB/' + req.params.db + '.json', JSON.stringify(data))
+    res.sendStatus(200)
+  } else {
+    res.sendStatus(403)
+  }
+})
+
+app.delete('/:db', (req, res) => {
+  console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
+  if (!fs.existsSync('./DB/' + req.params.db + '.json')) {
+    res.sendStatus(404)
+  } else if (settings.permission[req.params.db + '.json'].delete) {
+    fs.unlinkSync('./DB/' + req.params.db + '.json')
+    res.sendStatus(200)
+  } else {
+    res.sendStatus(403)
   }
 })
 
