@@ -42,10 +42,10 @@
         <main class="mdl-layout__content">
           <div class="page-content" id="render">
               <div class="container">
+              <div style="margin-top: 20px"></div>
               <%
                 let counter = 0
                 dbs.forEach((v, i) => { %>
-                <button type="button" class="btn btn-primary" style="margin-top: 20px" data-toggle="modal" data-target="">전체 설정</button>
                 <div class="card" style="margin-top:5px">
                   <div class="card-body">
                     <h4 class="card-title"><%= 'GET /' + v.replace('.json', '') %></h4>

@@ -36,8 +36,74 @@
         </div>
         <main class="mdl-layout__content">
           <div class="page-content" id="render">
+            <div class="container">
+                <button type="button" class="btn btn-success" style="margin-top: 20px" onclick="add()">DB추가</button>
+              <%
+                let counter = 0
+                dbs.forEach((v, i) => { %>
+                <div class="card" style="margin-top:5px">
+                  <div class="card-body">
+                    <h4 class="card-title"><%= './DB/' + v %></h4>
+                    <p class="card-text">
+                      <div class="btn-group-toggle" data-toggle="buttons">                      
+                        <button type="button" class="btn btn-primary viewbtn" onclick="window.open('/<%= v.replace('.json', '') %>')">보기</button>
+                        <button type="button" class="btn btn-info editbtn" onclick="alert('에디터는 아직 개발중인 기능입니다')">수정</button>
+                        <button type="button" class="btn btn-danger delbtn" onclick="del('<%= v.replace('.json', '') %>')">삭제</button>
+                      </div>
+                    </p>
+                </div>
+              <% }) %>
+            </div>
           </div>
         </main>
       </div>
+      <script>
+          setInterval(() => {
+          for (let n = 0; n < document.getElementsByClassName('openLab').length; n++) {
+            if (document.getElementsByClassName('openLab')[n].classList.contains('active')) {
+              document.getElementsByClassName('openLab')[n].innerHTML = '공개'
+              document.getElementsByClassName('openLab')[n].classList.replace('btn-success', 'btn-secondary')
+            } else {
+              document.getElementsByClassName('openLab')[n].innerHTML = '비공개'
+              document.getElementsByClassName('openLab')[n].classList.replace('btn-secondary', 'btn-success')
+            }
+          }
+        }, 1)
+
+        function del (key) {
+          var xhr = new XMLHttpRequest()
+          var target = '/admin/delete?auth=<%= auth %>&key=' + key
+          xhr.open('GET', target)
+          xhr.send()
+
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE){
+              if (xhr.status !== 200) {
+                alert('서버가 응답하지 않습니다!')
+              } else {
+                window.location.replace('/admin/dbSetting?auth=<%= auth %>')
+              }
+            }
+          }
+        }
+        
+        function add () {
+          const dataName = prompt('데이터파일 이름을 정해주세요') || 'temp' + Math.floor(Math.random() * 1000)
+          var xhr = new XMLHttpRequest()
+          var target = '/admin/add?auth=<%= auth %>&key=' + dataName
+          xhr.open('GET', target)
+          xhr.send()
+
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE){
+              if (xhr.status !== 200) {
+                alert('서버가 응답하지 않습니다!')
+              } else {
+                window.location.replace('/admin/dbSetting?auth=<%= auth %>')
+              }
+            }
+          }
+        }
+      </script>
   </body>
 </html>

@@ -10,6 +10,8 @@
     <script src="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
   </head>
   <body>
     <!-- Always shows a header, even in smaller screens. -->
@@ -36,6 +38,10 @@
         </div>
         <main class="mdl-layout__content">
           <div class="page-content" id="render">
+            <div class="alert alert-warning" role="alert">
+              RestBase는 현재 개발중인 버전으로 안정적이지 않거나 기능이 없을 수 있습니다
+            </div>
+            <%= JSON.stringify(count) %>
           </div>
         </main>
       </div>

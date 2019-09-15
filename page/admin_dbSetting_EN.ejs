@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="kr">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -29,18 +29,69 @@
         <div class="mdl-layout__drawer">
           <span class="mdl-layout-title">Menu</span>
           <nav class="mdl-navigation">
-            <a class="mdl-navigation__link" href="/admin/dashboard?auth=<%= auth %>">DashBoard</a>
+            <a class="mdl-navigation__link" href="/admin/dashboard?auth=<%= auth %>">Dashboard</a>
             <a class="mdl-navigation__link" href="/admin/dbSetting?auth=<%= auth %>">DataBase Management</a>
             <a class="mdl-navigation__link" href="/admin/serverSetting?auth=<%= auth %>">RestServer Management</a>
           </nav>
         </div>
         <main class="mdl-layout__content">
           <div class="page-content" id="render">
-            <div class="alert alert-danger" role="alert">
-              <b>RestBase notifcation: </b> Do not use "F5" for Security
+            <div class="container">
+                <button type="button" class="btn btn-success" style="margin-top: 20px" onclick="add()">Add DB</button>
+              <%
+                let counter = 0
+                dbs.forEach((v, i) => { %>
+                <div class="card" style="margin-top:5px">
+                  <div class="card-body">
+                    <h4 class="card-title"><%= './DB/' + v %></h4>
+                    <p class="card-text">
+                      <div class="btn-group-toggle" data-toggle="buttons">                      
+                        <button type="button" class="btn btn-primary viewbtn" onclick="window.open('/<%= v.replace('.json', '') %>')">View</button>
+                        <button type="button" class="btn btn-info editbtn" onclick="alert('Editor is not yet')">Edit</button>
+                        <button type="button" class="btn btn-danger delbtn" onclick="del('<%= v.replace('.json', '') %>')">Delete</button>
+                      </div>
+                    </p>
+                </div>
+              <% }) %>
             </div>
           </div>
         </main>
       </div>
+      <script>
+        function del (key) {
+          var xhr = new XMLHttpRequest()
+          var target = '/admin/delete?auth=<%= auth %>&key=' + key
+          xhr.open('GET', target)
+          xhr.send()
+
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE){
+              if (xhr.status !== 200) {
+                alert('Server is not responding...')
+              } else {
+                window.location.replace('/admin/dbSetting?auth=<%= auth %>')
+              }
+            }
+          }
+        }
+        
+        function add () {
+          const dataName = prompt('Please Enter the Data Name') || 'temp' + Math.floor(Math.random() * 1000)
+          var xhr = new XMLHttpRequest()
+          var target = '/admin/add?auth=<%= auth %>&key=' + dataName
+          xhr.open('GET', target)
+          xhr.send()
+
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE){
+              if (xhr.status !== 200) {
+                alert('Server is not responding...')
+              } else {
+                window.location.replace('/admin/dbSetting?auth=<%= auth %>')
+              }
+            }
+          }
+        }
+      </script>
   </body>
 </html>

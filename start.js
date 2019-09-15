@@ -10,6 +10,14 @@ const settings = require('./settings') || null
 if (!settings) console.log('"node manage" first')
 
 const app = express()
+const count = {
+  user: 0,
+  admin: 0,
+  get: 0,
+  post: 0,
+  put: 0,
+  delete: 0
+}
 
 if (settings.useCors) {
   app.use(cors())
@@ -44,12 +52,14 @@ fs.writeFileSync('./auth/keys.json', '[]')
 const keys = require('./auth/keys.json')
 
 app.get('/admin', (req, res) => {
+  count.admin++
   console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
   const temp = fs.readFileSync('./page/admin_' + settings.locale + '.html')
   res.send(temp.toString('utf-8'))
 })
 
 app.get('/admin/:locate', (req, res) => {
+  count.admin++
   console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
   switch (req.params.locate) {
     case 'verity':
@@ -80,6 +90,26 @@ app.get('/admin/:locate', (req, res) => {
       }
       break
 
+    case 'delete':
+      if (keys.includes(req.query.auth) && req.query.key) {
+        console.log(markup.green.underline('AUTH') + ' ' + markup.green('Auth UUID: ' + req.query.auth))
+        fs.unlinkSync('./DB/' + req.query.key + '.json')
+        res.sendStatus(200)
+      } else {
+        res.sendStatus(406)
+      }
+      break
+
+    case 'add':
+      if (keys.includes(req.query.auth) && req.query.key) {
+        console.log(markup.green.underline('AUTH') + ' ' + markup.green('Auth UUID: ' + req.query.auth))
+        fs.writeFileSync('./DB/' + req.query.key + '.json', '{}')
+        res.sendStatus(200)
+      } else {
+        res.sendStatus(406)
+      }
+      break
+
     default:
       if (!req.query.auth) {
         res.sendStatus(401)
@@ -88,7 +118,7 @@ app.get('/admin/:locate', (req, res) => {
         const auth = uuid()
         keys[keys.indexOf(req.query.auth)] = auth
         console.log(markup.magenta.underline('AUTHGEN') + ' ' + markup.magenta('Auth UUID: ' + auth))
-        ejs.renderFile('./page/admin_' + req.params.locate + '_' + settings.locale + '.ejs', { auth: auth, dbs: fs.readdirSync('./DB/'), settings: settings }, (err, str) => {
+        ejs.renderFile('./page/admin_' + req.params.locate + '_' + settings.locale + '.ejs', { auth: auth, dbs: fs.readdirSync('./DB/'), settings: settings, count: count }, (err, str) => {
           if (err) console.error(err)
           res.send(str)
         })
@@ -112,6 +142,7 @@ app.get('/favicon.ico', (req, res) => {
 })
 
 app.get('/', (req, res) => {
+  count.user++
   console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
   const temp = {
     databases: []
@@ -125,6 +156,8 @@ app.get('/', (req, res) => {
 })
 
 app.get('/:db', (req, res) => {
+  count.user++
+  count.get++
   console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
   if (!fs.existsSync('./DB/' + req.params.db + '.json')) {
     res.sendStatus(404)
@@ -143,6 +176,8 @@ app.get('/:db', (req, res) => {
 })
 
 app.post('/:db', (req, res) => {
+  count.user++
+  count.post++
   console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
   if (!fs.existsSync('./DB/' + req.params.db + '.json')) {
     res.sendStatus(404)
@@ -155,6 +190,8 @@ app.post('/:db', (req, res) => {
 })
 
 app.put('/:db', (req, res) => {
+  count.user++
+  count.put++
   console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
   if (!fs.existsSync('./DB/' + req.params.db + '.json')) {
     res.sendStatus(404)
@@ -169,6 +206,8 @@ app.put('/:db', (req, res) => {
 })
 
 app.delete('/:db', (req, res) => {
+  count.user++
+  count.delete++
   console.log(markup.cyan.underline('REQUEST') + ' ' + markup.cyan(req.ip + ' ' + req.protocol + ' ' + req.path))
   if (!fs.existsSync('./DB/' + req.params.db + '.json')) {
     res.sendStatus(404)

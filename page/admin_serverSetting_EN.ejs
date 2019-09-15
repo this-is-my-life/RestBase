@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="kr">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,7 +9,12 @@
     <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.indigo-pink.min.css">
     <script src="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
   </head>
   <body>
     <!-- Always shows a header, even in smaller screens. -->
@@ -17,7 +22,7 @@
         <header class="mdl-layout__header">
           <div class="mdl-layout__header-row">
             <!-- Title -->
-            <span class="mdl-layout-title">RestBase Management - Rest Server Management</span>
+            <span class="mdl-layout-title">RestBase - Rest Server Management</span>
             <!-- Add spacer, to align navigation to the right -->
             <div class="mdl-layout-spacer"></div>
             <!-- Navigation. We hide it in small screens. -->
@@ -36,11 +41,93 @@
         </div>
         <main class="mdl-layout__content">
           <div class="page-content" id="render">
-            <div class="alert alert-danger" role="alert">
-              <b>RestBase notifcation: </b> Do not use "F5" for Security
-            </div>
+              <div class="container">
+              <div style="margin-top: 20px"></div>
+              <%
+                let counter = 0
+                dbs.forEach((v, i) => { %>
+                <div class="card" style="margin-top:5px">
+                  <div class="card-body">
+                    <h4 class="card-title"><%= 'GET /' + v.replace('.json', '') %></h4>
+                    <p class="card-text">
+                      <div class="btn-group-toggle" data-toggle="buttons">
+                        <label onclick="apply('<%= v %>,get',document.getElementsByClassName('checkLab')[<%= counter++ %>].classList.contains('active') ? 'false' : 'true' )" class="btn btn-success checkLab <%= settings.permission[v].get ? 'active' : '' %>">
+                          <input type="checkbox" class="checkBtn" autocomplete="off"> inactivate
+                        </label>
+                      </div>
+                    </p>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body"><div class="btn-group" data-toggle="buttons">
+                  </div>
+                    <h4 class="card-title"><%= 'POST /' + v.replace('.json', '') %></h4>
+                    <p class="card-text">
+                        <div class="btn-group-toggle" data-toggle="buttons">
+                          <label onclick="apply('<%= v %>,post', document.getElementsByClassName('checkLab')[<%= counter++ %>].classList.contains('active') ? 'false' : 'true')" class="btn btn-success checkLab <%= settings.permission[v].post ? 'active' : ''  %>">
+                            <input type="checkbox" class="checkBtn" autocomplete="off"> inactivate
+                          </label>
+                        </div>
+                      </p>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title"><%= 'PUT /' + v.replace('.json', '') %></h4>
+                    <p class="card-text">
+                        <div class="btn-group-toggle" data-toggle="buttons">
+                          <label onclick="apply('<%= v %>,put', document.getElementsByClassName('checkLab')[<%= counter++ %>].classList.contains('active') ? 'false' : 'true')" class="btn btn-success checkLab <%= settings.permission[v].put ? 'active' : ''  %>">
+                            <input type="checkbox" class="checkBtn" autocomplete="off"> inactivate
+                          </label>
+                        </div>
+                      </p>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title"><%= 'DELETE /' + v.replace('.json', '') %></h4>
+                    <p class="card-text">
+                        <div class="btn-group-toggle" data-toggle="buttons">
+                          <label onclick="apply('<%= v %>,delete', document.getElementsByClassName('checkLab')[<%= counter++ %>].classList.contains('active') ? 'false' : 'true')" class="btn btn-success checkLab <%= settings.permission[v].delete ? 'active' : ''  %>">
+                            <input type="checkbox" class="checkBtn" autocomplete="off"> inactivate
+                          </label>
+                        </div>
+                      </p>
+                  </div>
+                </div>
+                <hr />
+              <% }) %>
+              </div>
           </div>
         </main>
       </div>
+      <script>
+        setInterval(() => {
+          for (let n = 0; n < document.getElementsByClassName('checkLab').length; n++) {
+            if (document.getElementsByClassName('checkLab')[n].classList.contains('active')) {
+              document.getElementsByClassName('checkLab')[n].innerHTML = 'activate'
+              document.getElementsByClassName('checkLab')[n].classList.replace('btn-danger', 'btn-success')
+            } else {
+              document.getElementsByClassName('checkLab')[n].innerHTML = 'inactivate'
+              document.getElementsByClassName('checkLab')[n].classList.replace('btn-success', 'btn-danger')
+            }
+          }
+        }, 1)
+
+        function apply (key, value) {
+          var xhr = new XMLHttpRequest()
+          var target = '/admin/setPermission?auth=<%= auth %>&key=' + key + '&value=' + value
+          xhr.open('GET', target)
+          xhr.send()
+
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === XMLHttpRequest.DONE){
+              if (xhr.status !== 200) {
+                alert('Server is not responding...')
+              }
+            }
+          }
+        }
+      </script>
   </body>
 </html>
